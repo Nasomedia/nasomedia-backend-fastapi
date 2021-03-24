@@ -10,21 +10,21 @@ router = APIRouter()
 
 
 @router.get("/", response_model=List[schemas.Series])
-def read_series(
+def read_serieses(
     db: Session = Depends(deps.get_db),
     skip: int = 0,
     limit: int = 100,
-    current_user: models.User = Depends(deps.get_current_active_user),
+    current_user: models.User = Depends(deps.get_current_active_superuser),
 ) -> Any:
     """
     Retrieve series.
     """
     if crud.user.is_superuser(current_user):
         series = crud.series.get_multi(db, skip=skip, limit=limit)
-    else:
-        series = crud.series.get_multi_by_owner(
-            db=db, owner_id=current_user.id, skip=skip, limit=limit
-        )
+    # else:
+    #     series = crud.series.get_multi_by_owner(
+    #         db=db, owner_id=current_user.id, skip=skip, limit=limit
+    #     )
     return series
 
 
@@ -33,12 +33,13 @@ def create_series(
     *,
     db: Session = Depends(deps.get_db),
     series_in: schemas.SeriesCreate,
-    current_user: models.User = Depends(deps.get_current_active_user),
+    current_user: models.User = Depends(deps.get_current_active_superuser),
 ) -> Any:
     """
     Create new series.
     """
-    series = crud.series.create_with_owner(db=db, obj_in=series_in, owner_id=current_user.id)
+    if crud.user.is_superuser(current_user):
+        series = crud.series.create(db=db, obj_in=series_in)
     return series
 
 
@@ -48,7 +49,7 @@ def update_series(
     db: Session = Depends(deps.get_db),
     id: int,
     series_in: schemas.SeriesUpdate,
-    current_user: models.User = Depends(deps.get_current_active_user),
+    current_user: models.User = Depends(deps.get_current_active_superuser),
 ) -> Any:
     """
     Update an series.
@@ -56,8 +57,8 @@ def update_series(
     series = crud.series.get(db=db, id=id)
     if not series:
         raise HTTPException(status_code=404, detail="Series not found")
-    if not crud.user.is_superuser(current_user) and (series.owner_id != current_user.id):
-        raise HTTPException(status_code=400, detail="Not enough permissions")
+    if not crud.user.is_superuser(current_user):
+        raise HTTPException(status_code=403, detail="Not enough permissions")
     series = crud.series.update(db=db, db_obj=series, obj_in=series_in)
     return series
 
@@ -67,7 +68,6 @@ def read_series(
     *,
     db: Session = Depends(deps.get_db),
     id: int,
-    current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
     Get series by ID.
@@ -75,8 +75,6 @@ def read_series(
     series = crud.series.get(db=db, id=id)
     if not series:
         raise HTTPException(status_code=404, detail="Series not found")
-    if not crud.user.is_superuser(current_user) and (series.owner_id != current_user.id):
-        raise HTTPException(status_code=400, detail="Not enough permissions")
     return series
 
 
@@ -85,7 +83,7 @@ def delete_series(
     *,
     db: Session = Depends(deps.get_db),
     id: int,
-    current_user: models.User = Depends(deps.get_current_active_user),
+    current_user: models.User = Depends(deps.get_current_active_superuser),
 ) -> Any:
     """
     Delete an series.
@@ -93,7 +91,22 @@ def delete_series(
     series = crud.series.get(db=db, id=id)
     if not series:
         raise HTTPException(status_code=404, detail="Series not found")
-    if not crud.user.is_superuser(current_user) and (series.owner_id != current_user.id):
+    if not crud.user.is_superuser(current_user):
         raise HTTPException(status_code=400, detail="Not enough permissions")
     series = crud.series.remove(db=db, id=id)
     return series
+
+
+@router.get("/{series_id}/episodes", response_model=List[schemas.Episode])
+def read_episodes_with_series_by_order(
+    *,
+    db: Session = Depends(deps.get_db),
+    series_id: int,
+) -> Any:
+    """
+    Retrieve episode with Series by episode, order.
+    """
+    episode = crud.episode.get_all_with_series_by_order(db=db, series_id=series_id)
+    if not episode:
+        raise HTTPException(status_code=404, detail="Episode not found")
+    return episode

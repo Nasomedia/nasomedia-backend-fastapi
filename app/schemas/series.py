@@ -1,4 +1,5 @@
 from typing import Optional
+from datetime import datetime
 
 from pydantic import BaseModel
 
@@ -7,6 +8,7 @@ from pydantic import BaseModel
 class SeriesBase(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
+    thumbnail: Optional[str] = "/noimage.png"
 
 
 # Properties to receive on series creation
@@ -23,7 +25,8 @@ class SeriesUpdate(SeriesBase):
 class SeriesInDBBase(SeriesBase):
     id: int
     title: str
-    owner_id: int
+    create_at: datetime
+    update_at: datetime
 
     class Config:
         orm_mode = True
