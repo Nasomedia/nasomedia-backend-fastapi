@@ -15,12 +15,12 @@ class CRUDEpisode(CRUDBase[Episode, EpisodeCreate, EpisodeUpdate]):
     def create_with_series(self, db: Session, *, obj_in: EpisodeCreate, series_id: int) -> Episode:
         obj_in_data = jsonable_encoder(obj_in)
         db_obj = self.model(
-            **obj_in_data, create_at=get_kst_now(),
+            **obj_in_data, create_at=get_kst_now(), update_at=get_kst_now(),
             series_id=series_id
         )  # type: ignore
 
-        sync_update_date(db=db, now=db_obj.create_at, series_id=series_id)
         db.add(db_obj)
+        sync_update_date(db=db, now=db_obj.create_at, series_id=series_id)
         db.commit()
         db.refresh(db_obj)
         return db_obj
@@ -40,19 +40,16 @@ class CRUDEpisode(CRUDBase[Episode, EpisodeCreate, EpisodeUpdate]):
         for field in obj_data:
             if field in update_data:
                 setattr(db_obj, field, update_data[field])
-        db_obj.update_at = get_kst_now()
-
-        sync_update_date(db=db, now=db_obj.create_at, series_id=db_obj.series_id)
-
         db.add(db_obj)
         db.commit()
+        sync_update_date(db=db, now=db_obj.create_at, episode_id=db_obj.id)
         db.refresh(db_obj)
         return db_obj
 
     def get_all_with_series_by_order(
         self, db: Session, *, series_id: int
     ) -> List[Episode]:
-        return db.query(self.model).filter(self.model.series_id == series_id).all().order_by(self.model.episode_order)
+        return db.query(self.model).filter(self.model.series_id == series_id).order_by(self.model.episode_order).all()
 
 
 episode = CRUDEpisode(Episode)

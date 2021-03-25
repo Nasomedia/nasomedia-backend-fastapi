@@ -7,7 +7,7 @@ from app.crud.base import CRUDBase
 from app.models.series import Series
 from app.schemas.series import SeriesCreate, SeriesUpdate
 
-from .utils import get_kst_now
+from .utils import get_kst_now, sync_update_date
 
 
 class CRUDSeries(CRUDBase[Series, SeriesCreate, SeriesUpdate]):
@@ -17,6 +17,7 @@ class CRUDSeries(CRUDBase[Series, SeriesCreate, SeriesUpdate]):
         db_obj.create_at = get_kst_now()
         db.add(db_obj)
         db.commit()
+        sync_update_date(db=db, now=db_obj.create_at, series_id=db_obj.id)
         db.refresh(db_obj)
         return db_obj
 

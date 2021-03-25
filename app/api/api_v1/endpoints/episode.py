@@ -1,6 +1,6 @@
 from typing import Any, List
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Body
 from sqlalchemy.orm import Session
 
 from app import crud, models, schemas
@@ -33,14 +33,17 @@ def create_episode(
     *,
     db: Session = Depends(deps.get_db),
     episode_in: schemas.EpisodeCreate,
-    series_id: int,
+    series_id: int = Body(...),
     current_user: models.User = Depends(deps.get_current_active_superuser),
 ) -> Any:
     """
     Create new episode.
     """
-    if crud.user.is_superuser(current_user):
-        episode = crud.episode.create(db=db, obj_in=episode_in)
+    if not crud.user.is_superuser(current_user):
+        raise HTTPException(status_code=403, detail="Not enough permissions")
+    if not crud.series.get(db=db, id=series_id):
+        raise HTTPException(status_code=400, detail="Episode not found. Maybe You've tried to insert wrong number")
+    episode = crud.episode.create_with_series(db=db, obj_in=episode_in, series_id=series_id)
     return episode
 
 

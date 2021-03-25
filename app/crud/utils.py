@@ -7,7 +7,7 @@ from typing import List, Optional
 from app.models.series import Series
 from app.models.episode import Episode
 
-from sqlalchemy.orm import exc as sa_exc
+from sqlalchemy import exc as sa_exc
 
 
 def get_kst_now() -> datetime:
@@ -32,7 +32,7 @@ def sync_update_date(
     if episode_id:
         episode = db.query(Episode).filter(Episode.id == episode_id).first()
         episode.update_at = now
-        
+
         if series_id:
             series = db.query(Series).filter(Series.id == series_id).first()
             series.update_at = now

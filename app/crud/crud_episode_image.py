@@ -56,10 +56,10 @@ class CRUDEpisodeImage(CRUDBase[EpisodeImage, EpisodeImageCreate, EpisodeImageUp
                 setattr(db_obj, field, update_data[field])
         db_obj.update_at = get_kst_now()
 
-        sync_update_date(db=db, episode_id=db_obj.episode_id)
 
         db.add(db_obj)
         db.commit()
+        sync_update_date(db=db, episode_id=db_obj.episode_id)
         db.refresh(db_obj)
         return db_obj
 
@@ -84,17 +84,17 @@ class CRUDEpisodeImage(CRUDBase[EpisodeImage, EpisodeImageCreate, EpisodeImageUp
             db_obj.update_at = now
             update_db_obj_list.append(db_obj)
 
-        sync_update_date(db=db, episode_id=db_obj.episode_id)
 
         db.add_all(update_db_obj_list)
         db.commit()
+        sync_update_date(db=db, episode_id=db_obj.episode_id)
         update_db_obj_list = refresh_all(db, update_db_obj_list)
-        return db_obj
+        return update_db_obj_list
 
     def get_all_with_episode_by_order(
         self, db: Session, *, episode_id: int
     ) -> List[EpisodeImage]:
-        return db.query(self.model).filter(self.model.episode_id == episode_id).all().order_by(self.model.episode_image_order)
+        return db.query(self.model).filter(self.model.episode_id == episode_id).order_by(self.model.image_order).all()
 
 
 episode_image = CRUDEpisodeImage(EpisodeImage)
