@@ -12,7 +12,7 @@ class Series(Base):
     title = Column(String, index=True, nullable=False)
     description = Column(String, index=True)
 
-    create_at = Column(DateTime)
-    update_at = Column(DateTime)
+    update_at = Column(DateTime(timezone=True))
+    create_at = Column(DateTime(timezone=True))
 
     thumbnail = Column(String)

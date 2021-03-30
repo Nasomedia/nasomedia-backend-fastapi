@@ -17,5 +17,6 @@ class EpisodeImage(Base):
     # image url
     url = Column(String)
 
-    episode_id = Column(Integer, ForeignKey("episode.id", ondelete="CASCADE"), nullable=False)
+    episode_id = Column(Integer, ForeignKey(
+        "episode.id", ondelete="CASCADE"), nullable=False)
     episode = relationship("Episode", back_populates="images")

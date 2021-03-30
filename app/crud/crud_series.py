@@ -42,5 +42,8 @@ class CRUDSeries(CRUDBase[Series, SeriesCreate, SeriesUpdate]):
         db.refresh(db_obj)
         return db_obj
 
+    def get_multi_by_update_at(self, db: Session, skip: int = 0, limit: int = 0):
+        return db.query(self.model).order_by(self.model.update_at.desc()).offset(skip).limit(limit).all()
+
 
 series = CRUDSeries(Series)

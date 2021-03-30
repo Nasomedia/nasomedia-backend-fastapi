@@ -16,10 +16,11 @@ class Episode(Base):
     episode_order = Column(Integer, index=True, nullable=False)
     title = Column(String, nullable=False)
 
-    create_at = Column(DateTime)
-    update_at = Column(DateTime)
+    create_at = Column(DateTime(timezone=True))
+    update_at = Column(DateTime(timezone=True))
 
-    series_id = Column(Integer, ForeignKey("series.id", ondelete="CASCADE"), nullable=False)
+    series_id = Column(Integer, ForeignKey(
+        "series.id", ondelete="CASCADE"), nullable=False)
     series = relationship("Series")
 
     images = relationship("EpisodeImage", back_populates="episode")
