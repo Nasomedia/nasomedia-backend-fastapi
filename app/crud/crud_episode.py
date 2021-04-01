@@ -51,5 +51,25 @@ class CRUDEpisode(CRUDBase[Episode, EpisodeCreate, EpisodeUpdate]):
     ) -> List[Episode]:
         return db.query(self.model).filter(self.model.series_id == series_id).order_by(self.model.episode_order).all()
 
+    def get_next_order(self, db: Session, *, episode_id: int) -> Episode:
+        current = self.get(db, episode_id)
+        return (
+            db.query(self.model)
+            .filter(self.model.series_id == current.series_id)
+            .order_by(self.model.episode_order.asc())
+            .filter(self.model.episode_order > current.episode_order)
+            .first()
+        )
+
+    def get_prev_order(self, db: Session, *, episode_id: int) -> Episode:
+        current = self.get(db, episode_id)
+        return (
+            db.query(self.model)
+            .filter(self.model.series_id == current.series_id)
+            .order_by(self.model.episode_order.desc())
+            .filter(self.model.episode_order < current.episode_order)
+            .first()
+        )
+
 
 episode = CRUDEpisode(Episode)

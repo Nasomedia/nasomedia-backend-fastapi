@@ -42,8 +42,10 @@ def create_episode(
     if not crud.user.is_superuser(current_user):
         raise HTTPException(status_code=403, detail="Not enough permissions")
     if not crud.series.get(db=db, id=series_id):
-        raise HTTPException(status_code=400, detail="Episode not found. Maybe You've tried to insert wrong number")
-    episode = crud.episode.create_with_series(db=db, obj_in=episode_in, series_id=series_id)
+        raise HTTPException(
+            status_code=400, detail="Episode not found. Maybe You've tried to insert wrong number")
+    episode = crud.episode.create_with_series(
+        db=db, obj_in=episode_in, series_id=series_id)
     return episode
 
 
@@ -76,6 +78,34 @@ def read_episode(*, db: Session = Depends(deps.get_db), id: int,) -> Any:
     if not episode:
         raise HTTPException(status_code=404, detail="Episode not found")
     return episode
+
+
+@router.get("/{id}", response_model=schemas.Episode)
+def get_prev_episode(*, db: Session = Depends(deps.get_db), id: int,) -> Any:
+    """
+    Get prev episode by ID.
+    """
+    episode = crud.episode.get(db=db, id=id)
+    if not episode:
+        raise HTTPException(status_code=404, detail="Current Episode not found")
+    prev_episode = crud.episode.get_prev_order(db=db, episode_id=id)
+    if not prev_episode:
+        raise HTTPException(status_code=404, detail="Previous Episode is not exist")
+    return prev_episode
+
+
+@router.get("/{id}", response_model=schemas.Episode)
+def get_next_episode(*, db: Session = Depends(deps.get_db), id: int,) -> Any:
+    """
+    Get next episode by ID.
+    """
+    episode = crud.episode.get(db=db, id=id)
+    if not episode:
+        raise HTTPException(status_code=404, detail="Current Episode not found")
+    next_episode = crud.episode.get_next_order(db=db, episode_id=id)
+    if not next_episode:
+        raise HTTPException(status_code=404, detail="Next Episode is not exist")
+    return next_episode
 
 
 @router.delete("/{id}", response_model=schemas.Episode)
