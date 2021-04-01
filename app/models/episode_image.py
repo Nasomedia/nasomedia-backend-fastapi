@@ -19,4 +19,4 @@ class EpisodeImage(Base):
 
     episode_id = Column(Integer, ForeignKey(
         "episode.id", ondelete="CASCADE"), nullable=False)
-    episode = relationship("Episode", back_populates="images")
+    episode = relationship("Episode")
