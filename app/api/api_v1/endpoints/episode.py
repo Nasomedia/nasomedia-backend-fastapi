@@ -80,7 +80,7 @@ def read_episode(*, db: Session = Depends(deps.get_db), id: int,) -> Any:
     return episode
 
 
-@router.get("/{id}", response_model=schemas.Episode)
+@router.get("/{id}/prev", response_model=schemas.Episode)
 def get_prev_episode(*, db: Session = Depends(deps.get_db), id: int,) -> Any:
     """
     Get prev episode by ID.
@@ -94,7 +94,7 @@ def get_prev_episode(*, db: Session = Depends(deps.get_db), id: int,) -> Any:
     return prev_episode
 
 
-@router.get("/{id}", response_model=schemas.Episode)
+@router.get("/{id}/next", response_model=schemas.Episode)
 def get_next_episode(*, db: Session = Depends(deps.get_db), id: int,) -> Any:
     """
     Get next episode by ID.
