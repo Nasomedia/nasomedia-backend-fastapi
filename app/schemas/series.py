@@ -9,6 +9,7 @@ class SeriesBase(BaseModel):
     title: Optional[str] = None
     description: Optional[str] = None
     thumbnail: Optional[str] = "/noimage.png"
+    is_complete: Optional[bool] = False
 
 
 # Properties to receive on series creation

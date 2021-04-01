@@ -23,7 +23,5 @@ class Episode(Base):
         "series.id", ondelete="CASCADE"), nullable=False)
     series = relationship("Series")
 
-    images = relationship("EpisodeImage", back_populates="episode")
-
     # thumbnail image url
     thumbnail = Column(String)

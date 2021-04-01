@@ -38,7 +38,7 @@ class EpisodeInDBBase(EpisodeBase):
 
 # Properties to return to client
 class Episode(EpisodeInDBBase):
-    images: List[EpisodeImage]
+    pass
 
 
 # Properties properties stored in DB

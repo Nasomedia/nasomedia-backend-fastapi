@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Column, ForeignKey, Integer, String, DateTime
+from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Boolean
 from sqlalchemy.orm import relationship
 
 from app.db.base_class import Base
@@ -16,3 +16,5 @@ class Series(Base):
     create_at = Column(DateTime(timezone=True))
 
     thumbnail = Column(String)
+
+    is_complete = Column(Boolean(), default=False)
