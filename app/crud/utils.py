@@ -39,7 +39,7 @@ def sync_update_date(
         if not series_id:
             series = db.query(Series).filter(Series.id == episode.series_id).first()
             series.update_at = now
-            
+
         db.add_all([series, episode])
 
     elif not episode_id and series_id:

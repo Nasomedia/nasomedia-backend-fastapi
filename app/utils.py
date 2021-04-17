@@ -1,5 +1,6 @@
 import logging
 from datetime import datetime, timedelta
+from pytz import timezone
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -8,6 +9,11 @@ from emails.template import JinjaTemplate
 from jose import jwt
 
 from app.core.config import settings
+
+
+def get_kst_now() -> datetime:
+    datetime.utcnow
+    return datetime.now(timezone("Asia/Seoul"))
 
 
 def send_email(

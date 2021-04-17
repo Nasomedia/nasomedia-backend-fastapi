@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Body
 from sqlalchemy.orm import Session
@@ -35,6 +35,7 @@ def create_episode(
     episode_in: schemas.EpisodeCreate,
     series_id: int = Body(...),
     current_user: models.User = Depends(deps.get_current_active_superuser),
+    episode_images_in: Optional[List[schemas.EpisodeImageCreate]] = None,
 ) -> Any:
     """
     Create new episode.
@@ -46,6 +47,9 @@ def create_episode(
             status_code=400, detail="Episode not found. Maybe You've tried to insert wrong number")
     episode = crud.episode.create_with_series(
         db=db, obj_in=episode_in, series_id=series_id)
+    if episode_images_in is not None and len(episode_images_in):
+        crud.episode_image.create_multi_with_episode(
+            db=db, obj_in_list=episode_images_in, episode_id=episode.id)
     return episode
 
 

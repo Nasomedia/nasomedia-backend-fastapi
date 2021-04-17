@@ -42,9 +42,31 @@ def create_episode_image(
     if not crud.user.is_superuser(current_user):
         raise HTTPException(status_code=403, detail="Not enough permissions")
     if not crud.episode.get(db=db, id=episode_id):
-        raise HTTPException(status_code=400, detail="Episode not found. Maybe You've tried to insert wrong number")
+        raise HTTPException(
+            status_code=400, detail="Episode not found. Maybe You've tried to insert wrong number")
     episode_image = crud.episode_image.create_with_episode(
         db=db, obj_in=episode_image_in, episode_id=episode_id)
+    return episode_image
+
+
+@router.post("/multi", response_model=List[schemas.EpisodeImage])
+def create_multi_episode_image(
+    *,
+    db: Session = Depends(deps.get_db),
+    episode_id: int = Body(...),
+    episode_image_in_list: schemas.EpisodeImageCreate,
+    current_user: models.User = Depends(deps.get_current_active_superuser),
+) -> Any:
+    """
+    Create multiple new episode image.
+    """
+    if not crud.user.is_superuser(current_user):
+        raise HTTPException(status_code=403, detail="Not enough permissions")
+    if not crud.episode.get(db=db, id=episode_id):
+        raise HTTPException(
+            status_code=400, detail="Episode not found. Maybe You've tried to insert wrong number")
+    episode_image = crud.episode_image.create_multi_with_episode(
+        db=db, obj_in_list=episode_image_in_list, episode_id=episode_id)
     return episode_image
 
 
