@@ -12,7 +12,7 @@ from app.core.config import settings
 
 
 def get_kst_now() -> datetime:
-    datetime.utcnow
+    """Get now datetime at KST."""
     return datetime.now(timezone("Asia/Seoul"))
 
 

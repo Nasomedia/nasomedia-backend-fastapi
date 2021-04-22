@@ -11,6 +11,7 @@ from sqlalchemy import exc as sa_exc
 
 
 def get_kst_now() -> datetime:
+    """Get now datetime at KST."""
     return datetime.now(timezone("Asia/Seoul"))
 
 
@@ -29,6 +30,7 @@ def sync_update_date(
     episode_id: int = None,
     series_id: int = None
 ) -> None:
+    """Synchronize Update date episode, series."""
     if episode_id:
         episode = db.query(Episode).filter(Episode.id == episode_id).first()
         episode.update_at = now
