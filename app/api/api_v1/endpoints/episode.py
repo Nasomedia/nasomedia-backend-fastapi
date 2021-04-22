@@ -74,11 +74,14 @@ def update_episode(
 
 
 @router.get("/{id}", response_model=schemas.Episode)
-def read_episode(*, db: Session = Depends(deps.get_db), id: int,) -> Any:
+def read_episode(*, db: Session = Depends(deps.get_db), id: int, view: Optional[bool] = True) -> Any:
     """
     Get episode by ID.
     """
-    episode = crud.episode.get(db=db, id=id)
+    if view:
+        episode = crud.episode.get_with_view(db=db, id=id)
+    else:
+        episode = crud.episode.get(db=db, id=id)
     if not episode:
         raise HTTPException(status_code=404, detail="Episode not found")
     return episode
@@ -87,7 +90,7 @@ def read_episode(*, db: Session = Depends(deps.get_db), id: int,) -> Any:
 @router.get("/{id}/prev", response_model=schemas.Episode)
 def get_prev_episode(*, db: Session = Depends(deps.get_db), id: int,) -> Any:
     """
-    Get prev episode by ID.
+    Get previous episode by ID.
     """
     episode = crud.episode.get(db=db, id=id)
     if not episode:

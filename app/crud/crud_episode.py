@@ -51,6 +51,15 @@ class CRUDEpisode(CRUDBase[Episode, EpisodeCreate, EpisodeUpdate]):
     ) -> List[Episode]:
         return db.query(self.model).filter(self.model.series_id == series_id).order_by(self.model.episode_order).all()
 
+    def get_with_view(
+        self, db: Session, *, id: int
+    ) -> Episode:
+        db_obj = db.query(self.model).filter(self.model.id == id).first()
+        setattr(db_obj, "view_count", db_obj.view_count + 1)
+        db.add(db_obj)
+        db.commit()
+        return db_obj
+
     def get_latest_by_series(self, db: Session, *, series_id: int) -> Episode:
         return (
             db.query(self.model)

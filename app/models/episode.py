@@ -25,3 +25,5 @@ class Episode(Base):
 
     # thumbnail image url
     thumbnail = Column(String)
+
+    view_count = Column(Integer, default=0, nullable=False)

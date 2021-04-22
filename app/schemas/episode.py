@@ -11,6 +11,7 @@ class EpisodeBase(BaseModel):
     title: Optional[str] = None
     episode_order: Optional[int] = None
     thumbnail: Optional[str] = "/noimage.png"
+    view_count: Optional[int] = None
 
 
 # Properties to receive on episode creation
