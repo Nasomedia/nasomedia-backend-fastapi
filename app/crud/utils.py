@@ -26,11 +26,14 @@ def refresh_all(db: Session, instances: List) -> List:
 
 def sync_update_date(
     db: Session,
-    now: datetime = get_kst_now(),
+    now: datetime = None,
     episode_id: int = None,
     series_id: int = None
 ) -> None:
     """Synchronize Update date episode, series."""
+    if now is None:
+        now = get_kst_now()
+        
     if episode_id:
         episode = db.query(Episode).filter(Episode.id == episode_id).first()
         episode.update_at = now

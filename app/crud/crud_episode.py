@@ -13,14 +13,15 @@ from .utils import get_kst_now, sync_update_date
 
 class CRUDEpisode(CRUDBase[Episode, EpisodeCreate, EpisodeUpdate]):
     def create_with_series(self, db: Session, *, obj_in: EpisodeCreate, series_id: int) -> Episode:
+        now = get_kst_now()
         obj_in_data = jsonable_encoder(obj_in)
         db_obj = self.model(
-            **obj_in_data, create_at=get_kst_now(), update_at=get_kst_now(),
+            **obj_in_data, create_at=now, update_at=now,
             series_id=series_id
         )  # type: ignore
 
         db.add(db_obj)
-        sync_update_date(db=db, now=db_obj.create_at, series_id=series_id)
+        sync_update_date(db=db, now=now, series_id=series_id)
         db.commit()
         db.refresh(db_obj)
         return db_obj
