@@ -1,0 +1,122 @@
+from app.schemas.cash_deposit import CashDepositRequest
+from app.utils import get_kst_now
+from app.models import cash_deposit
+from app.models.cash_deposit import CashDeposit
+from app.models.cash import Cash
+from typing import Any, List, Union
+
+from fastapi import APIRouter, Depends, HTTPException, Body
+from sqlalchemy.orm import Session
+
+from app import crud, models, schemas
+from app.api import deps
+
+router = APIRouter()
+
+
+@router.post("/order", response_model=schemas.CashDeposit)
+def create_cash_deposit(
+    *,
+    db: Session = Depends(deps.get_db),
+    cash_deposit_in: schemas.CashDepositRequest,
+    current_user: models.User = Depends(deps.get_current_active_user),
+) -> Any:
+    """
+    Create new cash deposit.
+    """
+    cash_deposit_in = schemas.CashDepositCreate(**cash_deposit_in.dict())
+
+    cash = crud.cash.get_by_user_id(db, current_user.id)
+    if not cash:
+        cash = crud.cash.create_with_user(
+            db=db, obj_in=schemas.CashCreate(), user_id=current_user.id
+        )
+
+    if cash_deposit_in.cash_id != cash.id:
+        raise HTTPException(status_code=400, detail="Invalid Cash Information")
+
+    if cash_deposit_in.deposit_amount < 1000 or cash_deposit_in.deposit_amount % 1000 != 0:
+        raise HTTPException(status_code=400, detail="Invalid Amount Value")
+
+    cash_deposit = crud.cash_deposit.create(db=db, obj_in=cash_deposit_in)
+    return cash_deposit
+
+
+@router.post("/ack", response_model=List[Union[schemas.Cash, schemas.CashDeposit, schemas.PaymentClient]])
+async def acknowledgment_cash_deposit(
+    *,
+    db: Session = Depends(deps.get_db),
+    payment_key: str,
+    order_id: int,
+    amount: int,
+    current_user: models.User = Depends(deps.get_current_active_user),
+) -> Any:
+    """
+    acknowledgment cash deposit.
+    """
+    cash_deposit_obj = crud.cash_deposit.get(db, id=order_id)
+    if not cash_deposit_obj:
+        raise HTTPException(status_code=400, detail="Invalid order id")
+
+    cash = crud.cash.get_by_user_id(db, current_user.id)
+    if cash_deposit_obj.cash_id != cash.id:
+        raise HTTPException(status_code=403, detail="Not enough permissions")
+
+    if amount != cash_deposit_obj.deposit_amount:
+        raise HTTPException(status_code=400, detail="Invalid Amount Value")
+
+    ack_info: schemas.Payment = await deps.toss.ack_payment(payment_key=payment_key, order_id=order_id, amount=amount)
+
+    if ack_info.status != "DONE":
+        raise HTTPException(status_code=400, detail="Failed to payment")
+
+    if ack_info.approvedAt is None:
+        cash_deposit_in = schemas.CashDepositUpdate(
+            payment_key=ack_info.paymentKey,
+            ack_at=get_kst_now(),
+        )
+    else:
+        cash_deposit_in = schemas.CashDepositUpdate(
+            payment_key=ack_info.paymentKey,
+            ack_at=ack_info.approvedAt,
+            approved_at=ack_info.approvedAt,
+        )
+        crud.cash.update(db, db_obj=cash, obj_in=schemas.CashDepositUpdate(
+            amount=cash.amount+cash_deposit_obj.deposit_amount))
+
+    cash_deposit = crud.cash_deposit.update(
+        db=db, db_obj=cash_deposit_obj, obj_in=cash_deposit_in)
+    return [cash, cash_deposit, deps.toss.encapsulate_payment_for_client(ack_info)]
+
+
+@router.post("/cancel", response_model=List[Union[schemas.Cash, schemas.CashDeposit]])
+async def cancel_cash_deposit(
+    *,
+    db: Session = Depends(deps.get_db),
+    payment_key: str,
+    cancel_reason: str = Body(...),
+    current_user: models.User = Depends(deps.get_current_active_user),
+) -> Any:
+    """
+    cancel cash deposit.
+    """
+    cash_deposit_obj = crud.cash_deposit.get_by_payment_key(db, payment_key=payment_key)
+    if not cash_deposit_obj:
+        raise HTTPException(status_code=400, detail="Invalid payment key")
+
+    cash = crud.cash.get_by_user_id(db, current_user.id)
+    if cash_deposit_obj.cash_id != cash.id:
+        raise HTTPException(status_code=403, detail="Not enough permissions")
+
+    cancel_info = await deps.toss.cancel_payment(payment_key=payment_key, cancel_reason=cancel_reason, refund_receive_account=None)
+
+    if cancel_info.status != "PARTIAL_CANCELED":
+        raise HTTPException(status_code=400, detail="Failed to cancel payment")
+
+    if cancel_info.approvedAt is not None:
+        crud.cash.update(db, db_obj=cash, obj_in=schemas.CashDepositUpdate(
+            amount=cash.amount-cash_deposit_obj.deposit_amount))
+
+    cash_deposit = crud.cash_deposit.update(
+        db=db, db_obj=cash_deposit_obj, obj_in=schemas.CashDepositUpdate(is_cancel=True))
+    return [cash, cash_deposit]

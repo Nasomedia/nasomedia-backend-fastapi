@@ -5,6 +5,8 @@ from pydantic import AnyHttpUrl, BaseSettings, EmailStr, HttpUrl, PostgresDsn, v
 
 import os
 import json
+import base64
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -21,7 +23,8 @@ class Settings(BaseSettings):
     # BACKEND_CORS_ORIGINS is a JSON-formatted list of origins
     # e.g: '["http://localhost", "http://localhost:4200", "http://localhost:3000", \
     # "http://localhost:8080", "http://local.dockertoolbox.tiangolo.com"]'
-    BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = json.loads(os.getenv("BACKEND_CORS_ORIGINS"))
+    BACKEND_CORS_ORIGINS: List[AnyHttpUrl] = json.loads(
+        os.getenv("BACKEND_CORS_ORIGINS"))
 
     @validator("BACKEND_CORS_ORIGINS", pre=True)
     def assemble_cors_origins(cls, v: Union[str, List[str]]) -> Union[List[str], str]:
@@ -88,6 +91,12 @@ class Settings(BaseSettings):
     FIRST_SUPERUSER: EmailStr = os.getenv("FIRST_SUPERUSER")
     FIRST_SUPERUSER_PASSWORD: str = os.getenv("FIRST_SUPERUSER_PASSWORD")
     USERS_OPEN_REGISTRATION: bool = os.getenv("USERS_OPEN_REGISTRATION") == True
+
+    TOSS_CLIENT_KEY: str = os.getenv("TOSS_CLIENT_KEY")
+    TOSS_SECRET_KEY: str = os.getenv("TOSS_SECRET_KEY")
+    TOSS_AUTHORIZATION = base64.b64encode(
+        ':'.join([TOSS_CLIENT_KEY, TOSS_SECRET_KEY]).encode("utf-8")
+    )
 
     class Config:
         case_sensitive = True

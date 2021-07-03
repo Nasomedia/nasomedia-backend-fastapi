@@ -3,6 +3,7 @@ app.egg-info
 temp/
 .env
 *.sh
+!dev_init.sh
 .mypy_cache
 .coverage
 htmlcov

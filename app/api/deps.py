@@ -11,6 +11,8 @@ from app.core import security
 from app.core.config import settings
 from app.db.session import SessionLocal
 
+from .toss_payments import toss
+
 reusable_oauth2 = OAuth2PasswordBearer(
     tokenUrl=f"{settings.API_V1_STR}/login/access-token"
 )

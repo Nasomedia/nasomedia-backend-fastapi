@@ -7,6 +7,7 @@ from app.db.base_class import Base
 
 if TYPE_CHECKING:
     from .series import Series  # noqa: F401
+    from .cash import Cash
 
 
 class User(Base):
@@ -16,3 +17,5 @@ class User(Base):
     hashed_password = Column(String, nullable=False)
     is_active = Column(Boolean(), default=True)
     is_superuser = Column(Boolean(), default=False)
+    cash = relationship("Cash", back_populates="user")
+

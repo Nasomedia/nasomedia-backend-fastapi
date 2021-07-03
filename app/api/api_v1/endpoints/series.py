@@ -121,9 +121,24 @@ def read_episodes_with_series_by_order(
     series_id: int,
 ) -> Any:
     """
-    Retrieve episode with Series by episode, order.
+    Retrieve episode with Series by episode order.
     """
     episode = crud.episode.get_all_with_series_by_order(db=db, series_id=series_id)
+    if not episode:
+        raise HTTPException(status_code=404, detail="Episode not found")
+    return episode
+
+
+@router.get("/{series_id}/latest", response_model=schemas.Episode)
+def read_latest_episode_with_series_by_update(
+    *,
+    db: Session = Depends(deps.get_db),
+    series_id: int,
+) -> Any:
+    """
+    Get latest episode with Series by update date.
+    """
+    episode = crud.episode.get_latest_by_series(db=db, series_id=series_id)
     if not episode:
         raise HTTPException(status_code=404, detail="Episode not found")
     return episode
