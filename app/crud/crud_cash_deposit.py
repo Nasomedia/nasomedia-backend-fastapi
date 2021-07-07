@@ -19,5 +19,8 @@ class CRUDCashDeposit(CRUDBase[CashDeposit, CashDepositCreate, CashDepositUpdate
     ) -> CashDeposit:
         return db.query(self.model).filter(self.model.payment_key == payment_key).first()
 
+    def remove_all(self, db: Session):
+        db.query(self.model).delete()
+
 
 cash_deposit = CRUDCashDeposit(CashDeposit)
