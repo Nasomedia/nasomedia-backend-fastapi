@@ -98,6 +98,10 @@ class Settings(BaseSettings):
         ':'.join([TOSS_CLIENT_KEY, TOSS_SECRET_KEY]).encode("utf-8")
     )
 
+    BLOB_CONNECT_STRING: str = os.getenv("BLOB_CONNECT_STRING")
+    BLOB_ACCOUNT_NAME: str = os.getenv("BLOB_ACCOUNT_NAME")
+    BLOB_CONTAINER_NAME: str = os.getenv("BLOB_CONTAINER_NAME")
+    
     class Config:
         case_sensitive = True
 
