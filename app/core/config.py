@@ -96,7 +96,7 @@ class Settings(BaseSettings):
     TOSS_SECRET_KEY: str = os.getenv("TOSS_SECRET_KEY")
     TOSS_AUTHORIZATION = base64.b64encode(
         ':'.join([TOSS_CLIENT_KEY, TOSS_SECRET_KEY]).encode("utf-8")
-    )
+    ).decode('utf-8')
 
     class Config:
         case_sensitive = True

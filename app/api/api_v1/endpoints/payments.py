@@ -40,7 +40,7 @@ def create_cash_deposit(
 
 
 @router.delete("/order/{id}", response_model=schemas.CashDeposit)
-def cancel_cash_deposit(
+def delete_cash_deposit(
     *,
     db: Session = Depends(deps.get_db),
     id: Union[str, Any],

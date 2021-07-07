@@ -36,23 +36,23 @@ class DepsTossPayments():
     async def get_session(self) -> ClientSessionType:
         return await aiohttp.ClientSession(headers=self.headers)
 
-    async def read_payment(self, payment_key: str) -> schemas.Payment:
+    async def read_payment(self, payment_key: str):
         async with aiohttp.ClientSession(headers=self.headers) as session:
             async with session.get(url=f"{BASE_URL}/v1/payments/{payment_key}") as r:
                 return await r.json()
 
-    async def read_payment_by_order_id(self, order_id: Union[str, int]) -> schemas.Payment:
+    async def read_payment_by_order_id(self, order_id: Union[str, int]):
         async with aiohttp.ClientSession(headers=self.headers) as session:
             async with session.get(url=f"{BASE_URL}/v1/payments/orders/{order_id}") as r:
                 return await r.json()
 
-    async def ack_payment(self, payment_key: str, order_id: Union[str, int], amount: int) -> dict:
+    async def ack_payment(self, payment_key: str, order_id: Union[str, int], amount: int):
         async with aiohttp.ClientSession(headers=self.headers) as session:
             async with session.post(url=f"{BASE_URL}/v1/payments/{payment_key}",
                                     json={"orderId": f"{order_id}", "amount": amount}) as r:
                 return await r.json()
 
-    async def cancel_payment(self, payment_key: str, cancel_reason: str, refund_receive_account: dict = None) -> schemas.Payment:
+    async def cancel_payment(self, payment_key: str, cancel_reason: str, refund_receive_account: dict = None):
         async with aiohttp.ClientSession(headers=self.headers) as session:
             if refund_receive_account is None:
                 body = {"cancelReason": f"{cancel_reason}", }
@@ -64,3 +64,8 @@ class DepsTossPayments():
 
 
 toss = DepsTossPayments()
+
+# async def test_request():
+#     async with aiohttp.ClientSession() as session:
+#         async with session.get(url=f"https://naso-media-backend.herokuapp.com/api/v1/series/update") as r:
+#             return await r.json()
