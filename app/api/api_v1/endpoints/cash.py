@@ -36,7 +36,7 @@ def create_cash(
     *,
     db: Session = Depends(deps.get_db),
     cash_in: schemas.CashCreate,
-    current_user: models.User = Depends(deps.get_current_user),
+    current_user: models.User = Depends(deps.get_current_active_superuser),
 ) -> Any:
     """
     Create new cash.
