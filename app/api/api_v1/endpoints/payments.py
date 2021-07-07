@@ -27,10 +27,6 @@ def create_cash_deposit(
     cash_deposit_in = schemas.CashDepositCreate(**cash_deposit_in.dict())
 
     cash = crud.cash.get_by_user_id(db, current_user.id)
-    if not cash:
-        cash = crud.cash.create_with_user(
-            db=db, obj_in=schemas.CashCreate(), user_id=current_user.id
-        )
 
     if cash_deposit_in.cash_id != cash.id:
         raise HTTPException(status_code=400, detail="Invalid Cash Information")
@@ -42,12 +38,34 @@ def create_cash_deposit(
     return cash_deposit
 
 
+@router.delete("/order/{id}", response_model=schemas.CashDeposit)
+def cancel_cash_deposit(
+    *,
+    db: Session = Depends(deps.get_db),
+    id: Union[str, Any],
+    current_user: models.User = Depends(deps.get_current_active_user),
+) -> Any:
+    """
+    Cancel cash deposit.
+    """
+    cash = crud.cash.get_by_user_id(db, current_user.id)
+    cash_deposit_in = crud.cash_deposit.get(db, id)
+    if cash_deposit_in.cash_id != cash.id:
+        raise HTTPException(status_code=400, detail="Invalid Cash Information")
+
+    if cash_deposit_in.deposit_amount < 1000 or cash_deposit_in.deposit_amount % 1000 != 0:
+        raise HTTPException(status_code=400, detail="Invalid Amount Value")
+
+    cash_deposit = crud.cash_deposit.remove(db=db, obj_in=cash_deposit_in)
+    return cash_deposit
+
+
 @router.post("/ack", response_model=List[Union[schemas.Cash, schemas.CashDeposit, schemas.PaymentClient]])
 async def acknowledgment_cash_deposit(
     *,
     db: Session = Depends(deps.get_db),
     payment_key: str,
-    order_id: int,
+    order_id: Union[Any, str],
     amount: int,
     current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
