@@ -3,6 +3,8 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
+from uuid import UUID
+
 
 # Shared properties
 class CashDepositBase(BaseModel):
@@ -37,7 +39,7 @@ class CashDepositUpdate(CashDepositBase):
 
 # Properties shared by models stored in DB
 class CashDepositInDBBase(CashDepositBase):
-    id: str
+    id: UUID
     deposit_amount: int
     cash_id: int
     request_at: datetime
