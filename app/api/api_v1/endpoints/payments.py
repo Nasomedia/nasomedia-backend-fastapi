@@ -1,3 +1,4 @@
+import asyncio
 from app.schemas.cash_deposit import CashDepositRequest
 from app.utils import get_kst_now
 from app.models import cash_deposit
@@ -83,8 +84,8 @@ async def acknowledgment_cash_deposit(
     if amount != cash_deposit_obj.deposit_amount:
         raise HTTPException(status_code=400, detail="Invalid Amount Value")
 
-    ack_info: schemas.Payment = await deps.toss.ack_payment(payment_key=payment_key, order_id=order_id, amount=amount)
-
+    ack_info = await deps.toss.ack_payment(payment_key=payment_key, order_id=order_id, amount=amount)
+    ack_info: schemas.Payment = deps.toss.serialize_payment(ack_info)
     if ack_info.status != "DONE":
         raise HTTPException(status_code=400, detail="Failed to payment")
 
@@ -127,7 +128,7 @@ async def cancel_cash_deposit(
         raise HTTPException(status_code=403, detail="Not enough permissions")
 
     cancel_info = await deps.toss.cancel_payment(payment_key=payment_key, cancel_reason=cancel_reason, refund_receive_account=None)
-
+    cancel_info = deps.toss.serialize_payment(cancel_info)
     if cancel_info.status != "PARTIAL_CANCELED":
         raise HTTPException(status_code=400, detail="Failed to cancel payment")
 

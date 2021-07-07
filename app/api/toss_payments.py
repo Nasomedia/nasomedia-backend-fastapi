@@ -26,7 +26,7 @@ class DepsTossPayments():
 
     def serialize_payment(self, obj_in):
         obj_in_data = jsonable_encoder(obj_in)
-        return schemas.Payment(obj_in_data)
+        return schemas.Payment(**obj_in_data)
 
     def encapsulate_payment_for_client(self, obj_in: schemas.Payment):
         obj_dict = obj_in.dict()
@@ -39,21 +39,18 @@ class DepsTossPayments():
     async def read_payment(self, payment_key: str) -> schemas.Payment:
         async with aiohttp.ClientSession(headers=self.headers) as session:
             async with session.get(url=f"{BASE_URL}/v1/payments/{payment_key}") as r:
-                obj = await r.json()
-                return self.serialize_payment(obj)
+                return await r.json()
 
     async def read_payment_by_order_id(self, order_id: Union[str, int]) -> schemas.Payment:
         async with aiohttp.ClientSession(headers=self.headers) as session:
             async with session.get(url=f"{BASE_URL}/v1/payments/orders/{order_id}") as r:
-                obj = await r.json()
-                return self.serialize_payment(obj)
+                return await r.json()
 
     async def ack_payment(self, payment_key: str, order_id: Union[str, int], amount: int) -> dict:
         async with aiohttp.ClientSession(headers=self.headers) as session:
             async with session.post(url=f"{BASE_URL}/v1/payments/{payment_key}",
                                     json={"orderId": f"{order_id}", "amount": amount}) as r:
-                obj = await r.json()
-                return self.serialize_payment(obj)
+                return await r.json()
 
     async def cancel_payment(self, payment_key: str, cancel_reason: str, refund_receive_account: dict = None) -> schemas.Payment:
         async with aiohttp.ClientSession(headers=self.headers) as session:
@@ -63,8 +60,7 @@ class DepsTossPayments():
                 body = {"cancelReason": f"{cancel_reason}",
                         "refundReceiveAccount": refund_receive_account}
             async with session.post(url=f"{BASE_URL}/v1/payments/{payment_key}", json=body) as r:
-                obj = await r.json()
-                return self.serialize_payment(obj)
+                return await r.json()
 
 
 toss = DepsTossPayments()
