@@ -1,8 +1,8 @@
 from typing import TYPE_CHECKING
 
 from sqlalchemy import Column, ForeignKey, Integer, String, Text, DateTime, Boolean
+from app.models._guid import GUID, GUID_SERVER_DEFAULT_POSTGRESQL
 from sqlalchemy.orm import relationship
-
 from app.db.base_class import Base
 
 if TYPE_CHECKING:
@@ -11,7 +11,11 @@ if TYPE_CHECKING:
 
 class CashDeposit(Base):
     __tablename__ = "cash_deposit"
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(
+        GUID,
+        primary_key=True,
+        server_default=GUID_SERVER_DEFAULT_POSTGRESQL
+    )
     description = Column(String, nullable=True)
 
     deposit_amount = Column(Integer, nullable=False)

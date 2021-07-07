@@ -5,3 +5,4 @@ from .episode_image import EpisodeImage
 from .cash import Cash
 from .cash_deposit import CashDeposit
 from .cash_usage import CashUsage
+from ._guid import GUID, GUID_SERVER_DEFAULT_POSTGRESQL

@@ -37,7 +37,7 @@ class CashDepositUpdate(CashDepositBase):
 
 # Properties shared by models stored in DB
 class CashDepositInDBBase(CashDepositBase):
-    id: int
+    id: str
     deposit_amount: int
     cash_id: int
     request_at: datetime
