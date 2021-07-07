@@ -56,25 +56,25 @@ class VirtualAccountInfo(BaseModel):
 
 
 class Payment(BaseModel):
-    paymentKey: Union[str, Any]
-    orderId: Union[str, Any]
-    mId: Union[str, Any]
-    currency: Union[str, Any]
-    method: Union[str, Any]
-    totalAmount: Union[int, Any]
-    balanceAmount: Union[int, Any]
-    status: Union[str, Any]
-    requestedAt: Union[datetime, Any]
+    paymentKey: str
+    orderId: str
+    mId: str
+    currency: str
+    method: str
+    totalAmount: int
+    balanceAmount: int
+    status: str
+    requestedAt: datetime
     approvedAt: Union[datetime, None]
-    useDiscount: Union[bool, Any]
+    useDiscount: bool
     discount: Any
-    useEscrow: Union[bool, Any]
-    useCashReceipt: Union[bool, Any]
+    useEscrow: bool
+    useCashReceipt: bool
     card: Union[CardInfo, None]
     virtualAccount: Union[VirtualAccountInfo, None]
     cashReceipt: Any
     cancels: Any
-    secret: Union[str, None, Any]
+    secret: Union[str, None]
 
 
 class PaymentClient(Payment):

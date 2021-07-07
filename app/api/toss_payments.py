@@ -26,7 +26,7 @@ class DepsTossPayments():
 
     def serialize_payment(self, obj_in):
         obj_in_data = jsonable_encoder(obj_in)
-        return schemas.Payment(**obj_in_data)
+        return schemas.Payment(obj_in_data)
 
     def encapsulate_payment_for_client(self, obj_in: schemas.Payment):
         obj_dict = obj_in.dict()
