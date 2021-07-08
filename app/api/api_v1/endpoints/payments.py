@@ -88,18 +88,14 @@ async def acknowledgment_cash_deposit(
     ack_info: schemas.Payment = deps.toss.serialize_payment(ack_info)
     if ack_info.status != "DONE":
         raise HTTPException(status_code=400, detail="Failed to payment")
-    print(ack_info)
     if ack_info.approvedAt:
         cash_deposit_in = schemas.CashDepositUpdate(
             payment_key=ack_info.paymentKey,
             ack_at=ack_info.approvedAt,
             approved_at=ack_info.approvedAt,
         )
-        print(cash_deposit_obj)
-        print(cash_deposit_obj.deposit_amount)
-        cash = crud.cash.update(db, db_obj=cash, obj_in=schemas.CashDepositUpdate(
+        cash = crud.cash.update(db, db_obj=cash, obj_in=schemas.CashUpdate(
             amount=cash.amount+cash_deposit_obj.deposit_amount))
-        print(cash.amount)
     else:
         cash_deposit_in = schemas.CashDepositUpdate(
             payment_key=ack_info.paymentKey,
@@ -136,7 +132,7 @@ async def cancel_cash_deposit(
         raise HTTPException(status_code=400, detail="Failed to cancel payment")
 
     if cancel_info.approvedAt is not None:
-        crud.cash.update(db, db_obj=cash, obj_in=schemas.CashDepositUpdate(
+        crud.cash.update(db, db_obj=cash, obj_in=schemas.CashUpdate(
             amount=cash.amount-cash_deposit_obj.deposit_amount))
 
     cash_deposit = crud.cash_deposit.update(
