@@ -96,6 +96,7 @@ async def acknowledgment_cash_deposit(
             approved_at=ack_info.approvedAt,
         )
         print(cash_deposit_obj)
+        print(cash_deposit_obj.deposit_amount)
         cash = crud.cash.update(db, db_obj=cash, obj_in=schemas.CashDepositUpdate(
             amount=cash.amount+cash_deposit_obj.deposit_amount))
         print(cash.amount)
