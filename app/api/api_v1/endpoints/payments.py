@@ -10,6 +10,7 @@ from fastapi import APIRouter, Depends, HTTPException, Body
 from sqlalchemy.orm import Session
 
 from app import crud, models, schemas
+from app.core.config import settings
 from app.api import deps
 
 router = APIRouter()
@@ -105,6 +106,34 @@ async def acknowledgment_cash_deposit(
     cash_deposit = crud.cash_deposit.update(
         db=db, db_obj=cash_deposit_obj, obj_in=cash_deposit_in)
     return [cash, cash_deposit, deps.toss.encapsulate_payment_for_client(ack_info)]
+
+
+@router.post("/callback")
+def cash_deposit_callback(
+    *,
+    db: Session = Depends(deps.get_db),
+    callback_in: schemas.PaymentCallbackRequest
+) -> Any:
+    """
+    cash deposit approve callback
+    """
+    cash_deposit = crud.cash_deposit.get(db, id=callback_in.orderId)
+    if not cash_deposit:
+        raise HTTPException(
+            status_code=400, detail=f"OrderId: {callback_in.orderId} not found")
+    if settings.TOSS_SECRET_KEY != callback_in.secret:
+        raise HTTPException(
+            status_code=400, detail="Invalid secret_key, You shoud check toss secret key")
+
+    crud.cash_deposit.update(db, db_obj=cash_deposit, obj_in=schemas.CashDepositUpdate(
+        approved_at=get_kst_now()
+    ))
+
+    cash = crud.cash.get(db, cash_deposit.cash_id)
+    crud.cash.update(db=db, db_obj=cash, obj_in=schemas.CashUpdate(
+        amount=cash.amount+cash_deposit.deposit_amount))
+
+    return {"status": "DONE", "detail": "Successfuly Update Cash"}
 
 
 @router.post("/cancel", response_model=List[Union[schemas.Cash, schemas.CashDeposit]])
