@@ -1,13 +1,32 @@
-from typing import Optional
+from typing import Any, Optional, List
 from datetime import datetime
 
 from pydantic import BaseModel
+from fastapi import UploadFile, File, Form
+import ast
 
 
 # Shared properties
 class EpisodeImageBase(BaseModel):
     image_order: Optional[int] = None
     url: Optional[str] = None
+
+
+# Properties to receive on http request
+class EpisodeImageFileRequest(BaseModel):
+    episode_id: int
+    order_in_list: List[int]
+    episode_image_in_list: List[UploadFile]
+
+    @classmethod
+    def as_form(
+        cls,
+        episode_id: int = Form(...),
+        order_in_str: str = Form(...),
+        episode_image_in_list: List[UploadFile] = File(...)
+    ) -> Any:
+        return cls(episode_id, ast.literal_eval(order_in_str), episode_image_in_list)
+
 
 # Properties to receive on series creation
 class EpisodeImageCreate(EpisodeImageBase):
