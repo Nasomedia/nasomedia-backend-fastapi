@@ -25,7 +25,7 @@ def create_cash_deposit(
     """
     Create new cash deposit.
     """
-    cash_deposit_in = schemas.CashDepositCreate(**cash_deposit_in)
+    cash_deposit_in = schemas.CashDepositCreate(**cash_deposit_in.dict())
 
     cash = crud.cash.get_by_user_id(db, current_user.id)
 
