@@ -73,7 +73,7 @@ def create_multi_episode_image(
     
     for idx, order in enumerate(episode_image_form.order_in_list):
         file = episode_image_form.episode_image_in_list[idx]
-        upload_url = f'{episode.series_id}/{episode.id}/{datetime.now().strftime("%Y:%m:%d-%H:%M:%S")}'
+        upload_url = f'{episode.series_id}/{episode.id}/{datetime.now().strftime("%Y%m%d%H%M%S")}{file.filename}'
         deps.blob.upload_file(file, upload_url)
         obj_in_list.append(schemas.EpisodeImageCreate(
             image_order=order,
