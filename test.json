@@ -1,0 +1,27 @@
+{
+    "mId": "tvivarepublica",
+    "paymentKey": "5zJ4xY7m0kODnyRpQWGrNpKYMnkKy3Kwv1M9ENjbeoPaZdL6",
+    "orderId": "fc10682e-d0f8-4227-9b31-2709560c6614",
+    "currency": "KRW",
+    "method": "문화상품권",
+    "totalAmount": 1000,
+    "balanceAmount": 1000,
+    "status": "DONE",
+    "requestedAt": "2021-07-08T11: 39: 15+09: 00",
+    "approvedAt": "2021-07-08T11: 39: 55+09: 00",
+    "useEscrow": false,
+    "card": null,
+    "virtualAccount": null,
+    "mobilePhone": null,
+    "giftCertificate": {
+        "approveNo": "021070811393990192",
+        "settlementStatus": "INCOMPLETED"
+    },
+    "cashReceipt": null,
+    "discount": null,
+    "cancels": null,
+    "secret": "ps_O6BYq7GWPVvAaBBXBbL3NE5vbo1d",
+    "useDiscount": false,
+    "discountAmount": 0,
+    "useCashReceipt": false
+}

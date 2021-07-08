@@ -85,17 +85,11 @@ async def acknowledgment_cash_deposit(
         raise HTTPException(status_code=400, detail="Invalid Amount Value")
 
     ack_info = await deps.toss.ack_payment(payment_key=payment_key, order_id=order_id, amount=amount)
-    print(ack_info)
     ack_info: schemas.Payment = deps.toss.serialize_payment(ack_info)
     if ack_info.status != "DONE":
         raise HTTPException(status_code=400, detail="Failed to payment")
 
-    if ack_info.approvedAt is None:
-        cash_deposit_in = schemas.CashDepositUpdate(
-            payment_key=ack_info.paymentKey,
-            ack_at=get_kst_now(),
-        )
-    else:
+    if ack_info.approvedAt:
         cash_deposit_in = schemas.CashDepositUpdate(
             payment_key=ack_info.paymentKey,
             ack_at=ack_info.approvedAt,
@@ -103,6 +97,11 @@ async def acknowledgment_cash_deposit(
         )
         crud.cash.update(db, db_obj=cash, obj_in=schemas.CashDepositUpdate(
             amount=cash.amount+cash_deposit_obj.deposit_amount))
+    else:
+        cash_deposit_in = schemas.CashDepositUpdate(
+            payment_key=ack_info.paymentKey,
+            ack_at=get_kst_now(),
+        )
 
     cash_deposit = crud.cash_deposit.update(
         db=db, db_obj=cash_deposit_obj, obj_in=cash_deposit_in)
