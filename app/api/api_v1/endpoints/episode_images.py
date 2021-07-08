@@ -1,10 +1,14 @@
+from app.crud import crud_series
 from typing import Any, List
 
-from fastapi import APIRouter, Depends, HTTPException, Body
+from fastapi import APIRouter, HTTPException, UploadFile, Depends, Body, Form, File
 from sqlalchemy.orm import Session
+from datetime import datetime
 
 from app import crud, models, schemas
 from app.api import deps
+from app.core.config import settings
+
 
 router = APIRouter()
 
@@ -53,20 +57,31 @@ def create_episode_image(
 def create_multi_episode_image(
     *,
     db: Session = Depends(deps.get_db),
-    episode_id: int = Body(...),
-    episode_image_in_list: schemas.EpisodeImageCreate,
+    episode_image_form: schemas.EpisodeImageFileRequest = Depends(
+        schemas.EpisodeImageFileRequest.as_form),
     current_user: models.User = Depends(deps.get_current_active_superuser),
 ) -> Any:
     """
     Create multiple new episode image.
     """
-    if not crud.user.is_superuser(current_user):
-        raise HTTPException(status_code=403, detail="Not enough permissions")
-    if not crud.episode.get(db=db, id=episode_id):
+    episode = crud.episode.get(db=db, id=episode_image_form.episode_id)
+    if not episode:
         raise HTTPException(
             status_code=400, detail="Episode not found. Maybe You've tried to insert wrong number")
+
+    obj_in_list: List[schemas.EpisodeImageCreate] = []
+    
+    for idx, order in enumerate(episode_image_form.order_in_list):
+        file = episode_image_form.episode_image_in_list[idx]
+        upload_url = f'{episode.series_id}/{episode.id}/{datetime.now().strftime("%Y%m%d%H%M%S")}{file.filename}'
+        deps.blob.upload_file(file, upload_url)
+        obj_in_list.append(schemas.EpisodeImageCreate(
+            image_order=order,
+            url=f'{settings.IMAGE_URL}/{upload_url}'
+        ))
+
     episode_image = crud.episode_image.create_multi_with_episode(
-        db=db, obj_in_list=episode_image_in_list, episode_id=episode_id)
+        db=db, obj_in_list=obj_in_list, episode_id=episode.id)
     return episode_image
 
 
@@ -117,5 +132,7 @@ def delete_episode_image(
         raise HTTPException(status_code=404, detail="Episode Image not found")
     if not crud.user.is_superuser(current_user):
         raise HTTPException(status_code=400, detail="Not enough permissions")
+
+    deps.blob.delete_file(episode_image.url.split(settings.BLOB_CONTAINER_NAME)[1][1:])
     episode_image = crud.episode_image.remove(db=db, id=id)
     return episode_image

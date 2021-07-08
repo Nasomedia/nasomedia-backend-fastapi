@@ -97,6 +97,12 @@ class Settings(BaseSettings):
     TOSS_AUTHORIZATION = base64.b64encode(
         f'{TOSS_SECRET_KEY}:'.encode("utf-8")).decode('utf-8')
 
+    BLOB_CONNECT_STRING: str = os.getenv("BLOB_CONNECT_STRING")
+    BLOB_ACCOUNT_NAME: str = os.getenv("BLOB_ACCOUNT_NAME")
+    BLOB_CONTAINER_NAME: str = os.getenv("BLOB_CONTAINER_NAME")
+
+    IMAGE_URL = f'https://{BLOB_ACCOUNT_NAME}.blob.core.windows.net/{BLOB_CONTAINER_NAME}'
+    
     class Config:
         case_sensitive = True
 
