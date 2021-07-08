@@ -15,7 +15,7 @@ class CRUDCashDeposit(CRUDBase[CashDeposit, CashDepositCreate, CashDepositUpdate
         return db.query(self.model).filter(self.model.cash_id == cash_id).offset(skip).limit(limit).all()
 
     def get_by_payment_key(
-        self, db: Session, payment_key: int,
+        self, db: Session, payment_key: str,
     ) -> CashDeposit:
         return db.query(self.model).filter(self.model.payment_key == payment_key).first()
 
