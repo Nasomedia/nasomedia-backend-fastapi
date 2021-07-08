@@ -31,7 +31,7 @@ class DepsTossPayments():
     def encapsulate_payment_for_client(self, obj_in: schemas.Payment):
         obj_dict = obj_in.dict()
         obj_dict["secret"] = None
-        return schemas.PaymentClient(obj_dict)
+        return schemas.PaymentClient(**obj_dict)
 
     async def get_session(self) -> ClientSessionType:
         return await aiohttp.ClientSession(headers=self.headers)
