@@ -25,7 +25,7 @@ class EpisodeImageFileRequest(BaseModel):
         order_in_str: str = Form(...),
         episode_image_in_list: List[UploadFile] = File(...)
     ) -> Any:
-        return cls(episode_id, ast.literal_eval(order_in_str), episode_image_in_list)
+        return cls(episode_id=episode_id, order_in_list=ast.literal_eval(order_in_str), episode_image_in_list=episode_image_in_list)
 
 
 # Properties to receive on series creation
