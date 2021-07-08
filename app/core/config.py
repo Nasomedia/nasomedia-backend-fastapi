@@ -101,6 +101,8 @@ class Settings(BaseSettings):
     BLOB_CONNECT_STRING: str = os.getenv("BLOB_CONNECT_STRING")
     BLOB_ACCOUNT_NAME: str = os.getenv("BLOB_ACCOUNT_NAME")
     BLOB_CONTAINER_NAME: str = os.getenv("BLOB_CONTAINER_NAME")
+
+    IMAGE_URL = f'https://{BLOB_ACCOUNT_NAME}.blob.core.windows.net/{BLOB_CONTAINER_NAME}'
     
     class Config:
         case_sensitive = True
