@@ -25,7 +25,7 @@ def create_cash_deposit(
     """
     Create new cash deposit.
     """
-    cash_deposit_in = schemas.CashDepositCreate(**cash_deposit_in.dict())
+    cash_deposit_in = schemas.CashDepositCreate(**cash_deposit_in)
 
     cash = crud.cash.get_by_user_id(db, current_user.id)
 
@@ -95,10 +95,10 @@ async def acknowledgment_cash_deposit(
             ack_at=ack_info.approvedAt,
             approved_at=ack_info.approvedAt,
         )
-        print(cash_deposit_in)
+        print(cash_deposit_obj)
         cash = crud.cash.update(db, db_obj=cash, obj_in=schemas.CashDepositUpdate(
             amount=cash.amount+cash_deposit_obj.deposit_amount))
-        print(cash)
+        print(cash.amount)
     else:
         cash_deposit_in = schemas.CashDepositUpdate(
             payment_key=ack_info.paymentKey,
