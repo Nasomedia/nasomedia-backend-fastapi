@@ -85,6 +85,7 @@ async def acknowledgment_cash_deposit(
         raise HTTPException(status_code=400, detail="Invalid Amount Value")
 
     ack_info = await deps.toss.ack_payment(payment_key=payment_key, order_id=order_id, amount=amount)
+    print(ack_info)
     ack_info: schemas.Payment = deps.toss.serialize_payment(ack_info)
     if ack_info.status != "DONE":
         raise HTTPException(status_code=400, detail="Failed to payment")
