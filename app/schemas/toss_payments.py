@@ -65,16 +65,16 @@ class Payment(BaseModel):
     balanceAmount: int
     status: str
     requestedAt: datetime
-    approvedAt: Union[datetime, None]
+    approvedAt: Optional[datetime]
     useDiscount: bool
     discount: Any
     useEscrow: bool
     useCashReceipt: bool
-    card: Union[CardInfo, None]
-    virtualAccount: Union[VirtualAccountInfo, None]
+    card: Optional[CardInfo]
+    virtualAccount: Optional[VirtualAccountInfo]
     cashReceipt: Any
     cancels: Any
-    secret: Union[str, None]
+    secret: Optional[str]
 
 
 class PaymentClient(Payment):
