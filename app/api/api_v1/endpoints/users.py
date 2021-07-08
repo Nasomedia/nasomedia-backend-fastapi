@@ -108,6 +108,13 @@ def create_user_open(
             status_code=400,
             detail="The user with this username already exists in the system",
         )
+        
+    if len(full_name) > 13:
+        raise HTTPException(
+            status_code=400,
+            detail="이름이 너무 깁니다.",
+        )
+
     user_in = schemas.UserCreate(password=password, email=email, full_name=full_name)
     user = crud.user.create(db, obj_in=user_in)
     return user
