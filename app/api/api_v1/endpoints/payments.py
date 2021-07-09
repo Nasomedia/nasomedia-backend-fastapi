@@ -101,6 +101,7 @@ async def acknowledgment_cash_deposit(
         cash_deposit_in = schemas.CashDepositUpdate(
             payment_key=ack_info.paymentKey,
             ack_at=get_kst_now(),
+            due_date=ack_info.virtualAccount.dueDate
         )
 
     cash_deposit = crud.cash_deposit.update(
