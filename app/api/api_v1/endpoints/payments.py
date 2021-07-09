@@ -43,16 +43,12 @@ def delete_cash_deposit(
     current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
-    Cancel cash deposit.
+    Delete cash deposit.
     """
     cash = crud.cash.get_by_user_id(db, current_user.id)
     cash_deposit_in = crud.cash_deposit.get(db, id)
     if cash_deposit_in.cash_id != cash.id:
         raise HTTPException(status_code=400, detail="Invalid Cash Information")
-
-    if cash_deposit_in.deposit_amount < 1000 or cash_deposit_in.deposit_amount % 1000 != 0:
-        raise HTTPException(status_code=400, detail="Invalid Amount Value")
-
     cash_deposit = crud.cash_deposit.remove(db=db, obj_in=cash_deposit_in)
     return cash_deposit
 
