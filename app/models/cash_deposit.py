@@ -32,3 +32,4 @@ class CashDeposit(Base):
 
     payment_key = Column(String, nullable=True)
     due_date = Column(DateTime(timezone=True))
+    
