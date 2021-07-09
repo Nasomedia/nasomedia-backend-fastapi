@@ -55,15 +55,19 @@ class VirtualAccountInfo(BaseModel):
     dueDate: datetime
 
 
-class Payment(BaseModel):
-    paymentKey: str
+class PaymentBase(BaseModel):
+    secret: str
+    status: str
     orderId: str
+
+
+class Payment(PaymentBase):
+    paymentKey: str
     mId: str
     currency: str
     method: str
     totalAmount: int
     balanceAmount: int
-    status: str
     requestedAt: datetime
     approvedAt: Optional[datetime]
     useDiscount: bool
@@ -79,3 +83,6 @@ class Payment(BaseModel):
 
 class PaymentClient(Payment):
     secret: None = None
+
+class PaymentCallbackRequest(PaymentBase):
+    pass

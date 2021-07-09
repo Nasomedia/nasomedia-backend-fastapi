@@ -15,6 +15,7 @@ class CashDepositBase(BaseModel):
     ack_at: Optional[datetime]
     approved_at: Optional[datetime]
     is_cancel: Optional[bool] = False
+    due_date: Optional[datetime]
 
 
 # Properties to receive on cash deposit creation
