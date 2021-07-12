@@ -69,13 +69,15 @@ async def acknowledgment_cash_deposit(
     if not cash_deposit_obj:
         raise HTTPException(status_code=400, detail="Invalid order id")
 
+    if cash_deposit_obj.payment_key:
+        raise HTTPException(status_code=400, detail="Already processed payment")
+
     cash = crud.cash.get_by_user_id(db, current_user.id)
     if cash_deposit_obj.cash_id != cash.id:
         raise HTTPException(status_code=403, detail="Not enough permissions")
 
     if amount != cash_deposit_obj.deposit_amount:
         raise HTTPException(status_code=400, detail="Invalid Amount Value")
-
     ack_info = await deps.toss.ack_payment(payment_key=payment_key, order_id=order_id, amount=amount)
     ack_info: schemas.Payment = deps.toss.serialize_payment(ack_info)
     if ack_info.status != "DONE":
@@ -95,8 +97,9 @@ async def acknowledgment_cash_deposit(
             due_date=ack_info.virtualAccount.dueDate
         )
 
-    cash_deposit = crud.cash_deposit.update(
-        db=db, db_obj=cash_deposit_obj, obj_in=cash_deposit_in)
+    await crud.cash_deposit.async_update(
+        db_obj=cash_deposit_obj, obj_in=cash_deposit_in)
+    cash_deposit = crud.cash_deposit.get(db, id=order_id)
     return [cash, cash_deposit, deps.toss.encapsulate_payment_for_client(ack_info)]
 
 

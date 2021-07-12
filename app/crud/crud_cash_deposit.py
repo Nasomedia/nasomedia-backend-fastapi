@@ -1,11 +1,12 @@
 from typing import List, Union, Dict, Any
 
-from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
+import sqlalchemy as sa
 
 from app.crud.base import CRUDBase
 from app.models.cash_deposit import CashDeposit
 from app.schemas.cash_deposit import CashDepositCreate, CashDepositUpdate
+from app.db.session import asyncDB
 
 
 class CRUDCashDeposit(CRUDBase[CashDeposit, CashDepositCreate, CashDepositUpdate]):
@@ -21,6 +22,22 @@ class CRUDCashDeposit(CRUDBase[CashDeposit, CashDepositCreate, CashDepositUpdate
 
     def remove_all(self, db: Session):
         db.query(self.model).delete()
+
+    async def async_update(
+        self,
+        *,
+        db_obj: CashDeposit,
+        obj_in: Union[CashDepositUpdate, Dict[str, Any]]
+    ) -> Any:
+        if isinstance(obj_in, dict):
+            update_data = obj_in
+        else:
+            update_data = obj_in.dict(exclude_unset=True)
+        query = sa\
+            .update(CashDeposit)\
+            .where(self.model.id == db_obj.id)\
+            .values(update_data)
+        return await asyncDB.execute(query)
 
 
 cash_deposit = CRUDCashDeposit(CashDeposit)
