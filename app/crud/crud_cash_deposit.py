@@ -20,9 +20,6 @@ class CRUDCashDeposit(CRUDBase[CashDeposit, CashDepositCreate, CashDepositUpdate
     ) -> CashDeposit:
         return db.query(self.model).filter(self.model.payment_key == payment_key).first()
 
-    def remove_all(self, db: Session):
-        db.query(self.model).delete()
-
     async def async_update(
         self,
         *,
@@ -38,6 +35,12 @@ class CRUDCashDeposit(CRUDBase[CashDeposit, CashDepositCreate, CashDepositUpdate
             .where(self.model.id == db_obj.id)\
             .values(update_data)
         return await asyncDB.execute(query)
+
+    def remove(self, db: Session, *, id: Any) -> CashDeposit:
+        obj = db.query(self.model).get(id)
+        db.delete(obj)
+        db.commit()
+        return obj
 
 
 cash_deposit = CRUDCashDeposit(CashDeposit)

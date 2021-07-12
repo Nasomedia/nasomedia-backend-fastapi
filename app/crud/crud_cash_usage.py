@@ -14,8 +14,5 @@ class CRUDCashUsage(CRUDBase[CashUsage, CashUsageCreate, CashUsageUpdate]):
     ) -> List[CashUsage]:
         return db.query(self.model).filter(self.model.cash_id == cash_id).offset(skip).limit(limit).all()
 
-    def remove_all(self, db: Session):
-        db.query(self.model).delete()
-
 
 cash_usage = CRUDCashUsage(CashUsage)
