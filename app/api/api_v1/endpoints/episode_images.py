@@ -1,7 +1,7 @@
 from app.crud import crud_series
 from typing import Any, List
 
-from fastapi import APIRouter, HTTPException, UploadFile, Depends, Body, Form, File
+from fastapi import APIRouter, HTTPException, UploadFile, Depends, Body, Form, File, status
 from sqlalchemy.orm import Session
 from datetime import datetime
 
@@ -9,6 +9,7 @@ from app import crud, models, schemas
 from app.api import deps
 from app.core.config import settings
 
+from azure.core.exceptions import AzureError
 
 router = APIRouter()
 
@@ -62,7 +63,7 @@ def create_multi_episode_image(
     current_user: models.User = Depends(deps.get_current_active_superuser),
 ) -> Any:
     """
-    Create multiple new episode image.
+    Create multiple new episode image by form.
     """
     episode = crud.episode.get(db=db, id=episode_image_form.episode_id)
     if not episode:
@@ -70,11 +71,18 @@ def create_multi_episode_image(
             status_code=400, detail="Episode not found. Maybe You've tried to insert wrong number")
 
     obj_in_list: List[schemas.EpisodeImageCreate] = []
-    
+
     for idx, order in enumerate(episode_image_form.order_in_list):
         file = episode_image_form.episode_image_in_list[idx]
+        if "image" not in file.content_type:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                detail="Your file is not image.")
         upload_url = f'{episode.series_id}/{episode.id}/{datetime.now().strftime("%Y%m%d%H%M%S")}{file.filename}'
-        deps.blob.upload_file(file, upload_url)
+        try:
+            deps.blob.upload_file(file, upload_url)
+        except AzureError as e:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                                detail=f"An error occurred while uploading the file. message: {e.message}")
         obj_in_list.append(schemas.EpisodeImageCreate(
             image_order=order,
             url=f'{settings.IMAGE_URL}/{upload_url}'

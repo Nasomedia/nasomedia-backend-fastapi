@@ -1,4 +1,4 @@
-from azure.storage.blob import BlobServiceClient, ContentSettings
+from azure.storage.blob import BlobServiceClient, ContentSettings, ContainerClient
 from azure.storage.blob._models import BlobProperties
 from fastapi import UploadFile
 from typing import List, Union
@@ -12,10 +12,9 @@ class DepsAzureBlob():
         """
         Deps object for Auzre Blob API
         """
-
         self.blob_service_client = BlobServiceClient.from_connection_string(
             settings.BLOB_CONNECT_STRING)
-        self.blob_container_client = self.blob_service_client.get_container_client(
+        self.blob_container_client: ContainerClient = self.blob_service_client.get_container_client(
             settings.BLOB_CONTAINER_NAME)
 
     def upload_file(self, file_in: UploadFile, upload_url: str):
