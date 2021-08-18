@@ -1,5 +1,5 @@
 #! /usr/bin/env bash
-
+# you shoud remove "case ~~ esac" part from .bashrc 
 # Run Poetry Install 
 curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python
 # Add poetry bin to PATH 

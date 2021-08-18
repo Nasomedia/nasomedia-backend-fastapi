@@ -70,7 +70,7 @@ async def acknowledgment_cash_deposit(
         raise HTTPException(status_code=400, detail="Invalid order id")
 
     if cash_deposit_obj.payment_key:
-        raise HTTPException(status_code=400, detail="Already processed payment")
+        raise HTTPException(status_code=400, detail="Already completed payment")
 
     cash = crud.cash.get_by_user_id(db, current_user.id)
     if cash_deposit_obj.cash_id != cash.id:
@@ -94,7 +94,8 @@ async def acknowledgment_cash_deposit(
         cash_deposit_in = schemas.CashDepositUpdate(
             payment_key=ack_info.paymentKey,
             ack_at=get_kst_now(),
-            due_date=ack_info.virtualAccount.dueDate
+            due_date=ack_info.virtualAccount.dueDate,
+            secret=ack_info.secret
         )
 
     await crud.cash_deposit.async_update(
@@ -116,17 +117,23 @@ def cash_deposit_callback(
     if not cash_deposit:
         raise HTTPException(
             status_code=400, detail=f"OrderId: {callback_in.orderId} not found")
-    if settings.TOSS_SECRET_KEY != callback_in.secret:
+    if cash_deposit.secret != callback_in.secret:
         raise HTTPException(
-            status_code=400, detail="Invalid secret_key, You shoud check toss secret key")
+            status_code=400, detail="Invalid request, You shoud check secret key")
 
-    crud.cash_deposit.update(db, db_obj=cash_deposit, obj_in=schemas.CashDepositUpdate(
-        approved_at=get_kst_now()
-    ))
+    if callback_in.status == "DONE":
+        crud.cash_deposit.update(db, db_obj=cash_deposit, obj_in=schemas.CashDepositUpdate(
+            approved_at=get_kst_now()
+        ))
 
-    cash = crud.cash.get(db, cash_deposit.cash_id)
-    crud.cash.update(db=db, db_obj=cash, obj_in=schemas.CashUpdate(
-        amount=cash.amount+cash_deposit.deposit_amount))
+        cash = crud.cash.get(db, cash_deposit.cash_id)
+        crud.cash.update(db=db, db_obj=cash, obj_in=schemas.CashUpdate(
+            amount=cash.amount+cash_deposit.deposit_amount))
+
+    else:
+        crud.cash_deposit.update(db, db_obj=cash_deposit, obj_in=schemas.CashDepositUpdate(
+            is_cancel=True
+        ))
 
     return {"status": "DONE", "detail": "Successfuly Update Cash"}
 
