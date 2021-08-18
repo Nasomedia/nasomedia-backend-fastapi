@@ -1,13 +1,14 @@
 from typing import TYPE_CHECKING
 
 from sqlalchemy import Column, ForeignKey, Integer, String, Text, DateTime
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relation, relationship
 
 from app.db.base_class import Base
 
 if TYPE_CHECKING:
     from .series import Series
     from .episode_image import EpisodeImage
+    from .terms import Terms
 
 
 class Episode(Base):
@@ -27,3 +28,4 @@ class Episode(Base):
     thumbnail = Column(String)
 
     view_count = Column(Integer, default=0, nullable=False)
+    terms = relationship("Terms")
