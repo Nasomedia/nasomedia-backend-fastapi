@@ -1,6 +1,8 @@
-from typing import Any, List
+from enum import Enum
+from typing import Any, List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.params import Query
 from sqlalchemy.orm import Session
 
 from app import crud, models, schemas
@@ -9,18 +11,36 @@ from app.api import deps
 router = APIRouter()
 
 
+class ModelName(str, Enum):
+    alexnet = "alexnet"
+    resnet = "resnet"
+    lenet = "lenet"
+
+
 @router.get("/", response_model=List[schemas.Series])
 def read_serieses(
     db: Session = Depends(deps.get_db),
     skip: int = 0,
     limit: int = 100,
+    sort_by: str = Query(
+        None,
+        title="sort criteria",
+        description="query string for sort",
+        enum=["create_at", "update_at", "id"]
+    ),
+    order_by: str = Query(
+        None,
+        title="order by",
+        description="query string for order",
+        enum=["asc", "desc"]
+    ),
     current_user: models.User = Depends(deps.get_current_active_superuser),
 ) -> Any:
     """
     Retrieve series.
     """
     if crud.user.is_superuser(current_user):
-        series = crud.series.get_multi(db, skip=skip, limit=limit)
+        series = crud.series.get_multi(db, skip=skip, limit=limit, sort_by=sort_by, order_by=order_by)
     # else:
     #     series = crud.series.get_multi_by_owner(
     #         db=db, owner_id=current_user.id, skip=skip, limit=limit

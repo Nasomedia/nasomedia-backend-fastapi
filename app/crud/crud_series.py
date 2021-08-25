@@ -1,16 +1,29 @@
-from typing import List, Union, Dict, Any
+from typing import List, Optional, Union, Dict, Any
 
 from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
+from sqlalchemy.sql.expression import text
 
 from app.crud.base import CRUDBase
 from app.models.series import Series
-from app.schemas.series import SeriesCreate, SeriesUpdate
+from app.schemas.series import SeriesCreate, SeriesUpdate, SeriesSortEnum
+from app.schemas import OrderEnum
 
 from .utils import get_kst_now, sync_update_date
 
 
 class CRUDSeries(CRUDBase[Series, SeriesCreate, SeriesUpdate]):
+    def get_multi(
+        self,
+        db: Session,
+        *, skip: int = 0, limit: int = 100,
+        sort_by: Optional[SeriesSortEnum] = None,
+        order_by: Optional[OrderEnum] = "desc",
+    ) -> List[Series]:
+        if sort_by:
+            return db.query(self.model).order_by(text(f"{sort_by} {order_by}")).offset(skip).limit(limit).all()
+        return db.query(self.model).offset(skip).limit(limit).all()
+
     def create(self, db: Session, *, obj_in: SeriesCreate) -> Series:
         obj_in_data = jsonable_encoder(obj_in)
         db_obj = self.model(**obj_in_data)  # type: ignore
@@ -41,9 +54,6 @@ class CRUDSeries(CRUDBase[Series, SeriesCreate, SeriesUpdate]):
         db.commit()
         db.refresh(db_obj)
         return db_obj
-
-    def get_multi_by_update_at(self, db: Session, skip: int = 0, limit: int = 0):
-        return db.query(self.model).order_by(self.model.update_at.desc()).offset(skip).limit(limit).all()
 
 
 series = CRUDSeries(Series)

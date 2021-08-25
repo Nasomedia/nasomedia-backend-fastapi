@@ -1,5 +1,6 @@
 from typing import Optional
 from datetime import datetime
+from enum import Enum
 
 from pydantic import BaseModel
 
@@ -41,3 +42,9 @@ class Series(SeriesInDBBase):
 # Properties properties stored in DB
 class SeriesInDB(SeriesInDBBase):
     pass
+
+
+class SeriesSortEnum(str, Enum):
+    CREATE_AT = "create_at"
+    UPDATE_AT = "update_at"
+    ID = "id"
