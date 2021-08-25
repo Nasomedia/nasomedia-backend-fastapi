@@ -34,7 +34,7 @@ def read_serieses(
         description="query string for order",
         enum=["asc", "desc"]
     ),
-    current_user: models.User = Depends(deps.get_current_active_superuser),
+    current_user: models.User = Depends(deps.get_current_active_user),
 ) -> Any:
     """
     Retrieve series.
