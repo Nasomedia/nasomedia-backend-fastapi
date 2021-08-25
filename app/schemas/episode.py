@@ -3,7 +3,7 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
-from .episode_image import EpisodeImage
+from .purchase_price import PurchasePrice
 
 
 # Shared properties
@@ -39,9 +39,10 @@ class EpisodeInDBBase(EpisodeBase):
 
 # Properties to return to client
 class Episode(EpisodeInDBBase):
-    pass
-
+    purchase_price: Optional[PurchasePrice]
 
 # Properties properties stored in DB
+
+
 class EpisodeInDB(EpisodeInDBBase):
     pass

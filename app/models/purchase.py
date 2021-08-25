@@ -7,7 +7,7 @@ from app.db.base_class import Base
 
 if TYPE_CHECKING:
     from .user import User
-    from .terms import Terms
+    from .purchase_price import PurchasePrice
 
 
 class Purchase(Base):
@@ -16,5 +16,5 @@ class Purchase(Base):
     create_at = Column(DateTime(timezone=True))
     user_id = Column(Integer, ForeignKey(
         "user.id", ondelete="CASCADE"), nullable=False)
-    terms_id = Column(Integer, ForeignKey(
-        "terms.id", ondelete="CASCADE"), nullable=False)
+    price_id = Column(Integer, ForeignKey(
+        "purchase_price.id", ondelete="CASCADE"), nullable=False)

@@ -9,8 +9,8 @@ if TYPE_CHECKING:
     from .episode import Episode
 
 
-class Terms(Base):
-    __tablename__ = "terms"
+class PurchasePrice(Base):
+    __tablename__ = "purchase_price"
     id = Column(Integer, primary_key=True, index=True)
     price = Column(Integer, nullable=False)
 
