@@ -47,24 +47,6 @@ def read_serieses(
     #     )
     return series
 
-
-@router.get("/update", response_model=List[schemas.Series])
-def read_serieses_by_update_at(
-    db: Session = Depends(deps.get_db),
-    skip: int = 0,
-    limit: int = 100,
-) -> Any:
-    """
-    Retrieve series by update time.
-    """
-    series = crud.series.get_multi_by_update_at(db, skip=skip, limit=limit)
-    # else:
-    #     series = crud.series.get_multi_by_owner(
-    #         db=db, owner_id=current_user.id, skip=skip, limit=limit
-    #     )
-    return series
-
-
 @router.post("/", response_model=schemas.Series)
 def create_series(
     *,
