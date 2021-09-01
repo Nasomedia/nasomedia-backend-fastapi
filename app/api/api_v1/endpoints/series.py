@@ -126,3 +126,17 @@ def delete_series(
         raise HTTPException(status_code=400, detail="Not enough permissions")
     series = crud.series.remove(db=db, id=id)
     return series
+
+@router.get("/{id}/episodes", response_model=List[schemas.Episode])
+def read_series_episodes(
+    *,
+    db: Session = Depends(deps.get_db),
+    series_id: int,
+) -> Any:
+    """
+    Retrieve episode with Series by episode order.
+    """
+    episode = crud.episode.get_all_with_series(db=db, series_id=series_id)
+    if not episode:
+        raise HTTPException(status_code=404, detail="Episode not found")
+    return episode

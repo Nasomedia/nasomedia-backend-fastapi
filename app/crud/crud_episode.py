@@ -47,7 +47,7 @@ class CRUDEpisode(CRUDBase[Episode, EpisodeCreate, EpisodeUpdate]):
         db.refresh(db_obj)
         return db_obj
 
-    def get_all_with_series_by_order(
+    def get_all_with_series(
         self, db: Session, *, series_id: int
     ) -> List[Episode]:
         return db.query(self.model).filter(self.model.series_id == series_id).order_by(self.model.episode_order).all()
