@@ -131,12 +131,12 @@ def delete_series(
 def read_series_episodes(
     *,
     db: Session = Depends(deps.get_db),
-    series_id: int,
+    id: int,
 ) -> Any:
     """
     Retrieve episode with Series by episode order.
     """
-    episode = crud.episode.get_all_with_series(db=db, series_id=series_id)
-    if not episode:
+    episodes = crud.episode.get_all_with_series(db=db, series_id=id)
+    if not episodes:
         raise HTTPException(status_code=404, detail="Episode not found")
-    return episode
+    return episodes
