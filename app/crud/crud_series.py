@@ -17,12 +17,21 @@ class CRUDSeries(CRUDBase[Series, SeriesCreate, SeriesUpdate]):
         self,
         db: Session,
         *, skip: int = 0, limit: int = 100,
-        sort_by: Optional[SeriesSortEnum] = None,
-        order_by: Optional[OrderEnum] = "desc",
+        sort_by: SeriesSortEnum = "id",
+        order_by: OrderEnum = "asc",
+        keyword: Optional[str] = None,
+        **kwargs
     ) -> List[Series]:
-        if sort_by:
-            return db.query(self.model).order_by(text(f"{sort_by} {order_by}")).offset(skip).limit(limit).all()
-        return db.query(self.model).offset(skip).limit(limit).all()
+        if keyword:
+            return db.query(self.model)\
+                .filter(Series.title.like("%" + keyword + "%"))\
+                .filter_by(**kwargs)\
+                .order_by(text(f"{sort_by} {order_by}"))\
+                .offset(skip).limit(limit).all()
+        return db.query(self.model)\
+            .filter_by(**kwargs)\
+            .order_by(text(f"{sort_by} {order_by}"))\
+            .offset(skip).limit(limit).all()
 
     def create(self, db: Session, *, obj_in: SeriesCreate) -> Series:
         obj_in_data = jsonable_encoder(obj_in)

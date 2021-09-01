@@ -48,3 +48,4 @@ class SeriesSortEnum(str, Enum):
     CREATE_AT = "create_at"
     UPDATE_AT = "update_at"
     ID = "id"
+    TITLE = "title"
