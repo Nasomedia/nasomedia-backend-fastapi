@@ -54,7 +54,7 @@ def delete_cash_deposit(
 
 
 @router.post("/ack", response_model=List[Union[schemas.Cash, schemas.CashDeposit, schemas.PaymentClient]])
-async def acknowledgment_cash_deposit(
+def acknowledgment_cash_deposit(
     *,
     db: Session = Depends(deps.get_db),
     payment_key: str,
@@ -78,7 +78,7 @@ async def acknowledgment_cash_deposit(
 
     if amount != cash_deposit_obj.deposit_amount:
         raise HTTPException(status_code=400, detail="Invalid Amount Value")
-    ack_info = await deps.toss.ack_payment(payment_key=payment_key, order_id=order_id, amount=amount)
+    ack_info = deps.toss.ack_payment(payment_key=payment_key, order_id=order_id, amount=amount)
     ack_info: schemas.Payment = deps.toss.serialize_payment(ack_info)
     if ack_info.status != "DONE":
         raise HTTPException(status_code=400, detail="Failed to payment")
@@ -97,9 +97,9 @@ async def acknowledgment_cash_deposit(
             due_date=ack_info.virtualAccount.dueDate
         )
 
-    await crud.cash_deposit.async_update(
-        db_obj=cash_deposit_obj, obj_in=cash_deposit_in)
-    cash_deposit = crud.cash_deposit.get(db, id=order_id)
+    cash_deposit = crud.cash_deposit.update(
+        db, db_obj=cash_deposit_obj, obj_in=cash_deposit_in
+    )
     return [cash, cash_deposit, deps.toss.encapsulate_payment_for_client(ack_info)]
 
 

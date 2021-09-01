@@ -1,18 +1,16 @@
 from app import schemas
-import json
+
 from typing import Union, Mapping, TypeVar, Optional
 from fastapi.encoders import jsonable_encoder
 from multidict import CIMultiDict, CIMultiDictProxy, istr
 
-import aiohttp
+import requests
 
 from app.core.config import settings
 
 Headers = Union[Mapping[Union[str, istr], str], CIMultiDict, CIMultiDictProxy]
 
 BASE_URL = 'https://api.tosspayments.com'
-
-ClientSessionType = TypeVar("ClientSessionType", bound=aiohttp.ClientSession)
 
 
 class DepsTossPayments():
@@ -33,39 +31,33 @@ class DepsTossPayments():
         obj_dict["secret"] = None
         return schemas.PaymentClient(**obj_dict)
 
-    async def get_session(self) -> ClientSessionType:
-        return await aiohttp.ClientSession(headers=self.headers)
+    def read_payment(self, payment_key: str):
+        r = requests.get(url=f"{BASE_URL}/v1/payments/{payment_key}", headers=self.headers)
+        return r.json()
 
-    async def read_payment(self, payment_key: str):
-        async with aiohttp.ClientSession(headers=self.headers) as session:
-            async with session.get(url=f"{BASE_URL}/v1/payments/{payment_key}") as r:
-                return await r.json()
+    def read_payment_by_order_id(self, order_id: Union[str, int]):
+        r = requests.get(url=f"{BASE_URL}/v1/payments/orders/{order_id}", headers=self.headers)
+        return r.json()
 
-    async def read_payment_by_order_id(self, order_id: Union[str, int]):
-        async with aiohttp.ClientSession(headers=self.headers) as session:
-            async with session.get(url=f"{BASE_URL}/v1/payments/orders/{order_id}") as r:
-                return await r.json()
+    def ack_payment(self, payment_key: str, order_id: Union[str, int], amount: int):
+        r = requests.post(url=f"{BASE_URL}/v1/payments/{payment_key}",
+                          json={"orderId": f"{order_id}", "amount": amount},
+                          headers=self.headers)
+        return r.json()
 
-    async def ack_payment(self, payment_key: str, order_id: Union[str, int], amount: int):
-        async with aiohttp.ClientSession(headers=self.headers) as session:
-            async with session.post(url=f"{BASE_URL}/v1/payments/{payment_key}",
-                                    json={"orderId": f"{order_id}", "amount": amount}) as r:
-                return await r.json()
-
-    async def cancel_payment(self, payment_key: str, cancel_reason: str, refund_receive_account: dict = None):
-        async with aiohttp.ClientSession(headers=self.headers) as session:
-            if refund_receive_account is None:
-                body = {"cancelReason": f"{cancel_reason}", }
-            else:
-                body = {"cancelReason": f"{cancel_reason}",
-                        "refundReceiveAccount": refund_receive_account}
-            async with session.post(url=f"{BASE_URL}/v1/payments/{payment_key}", json=body) as r:
-                return await r.json()
+    def cancel_payment(self, payment_key: str, cancel_reason: str, refund_receive_account: dict = None):
+        if refund_receive_account is None:
+            body = {"cancelReason": f"{cancel_reason}", }
+        else:
+            body = {"cancelReason": f"{cancel_reason}",
+                    "refundReceiveAccount": refund_receive_account}
+        r = requests.post(url=f"{BASE_URL}/v1/payments/{payment_key}", json=body)
+        return r.json()
 
 
 toss = DepsTossPayments()
 
-# async def test_request():
-#     async with aiohttp.ClientSession() as session:
-#         async with session.get(url=f"https://naso-media-backend.herokuapp.com/api/v1/series/update") as r:
-#             return await r.json()
+# def test_request():
+#     with aiohttp.ClientSession() as session:
+#         with session.get(url=f"https://naso-media-backend.herokuapp.com/api/v1/series/update") as r:
+#             return r.json()
